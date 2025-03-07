@@ -126,37 +126,36 @@ async function getWeatherCoordinates(location) {
 let currentCity = 0
 
 async function loadAllCities() {
-  // hope this workies
   for (const location of serverConfig.locationIndex.locations) {
     try {
-      const coordinates = await getWeatherCoordinates(location)
+      const coordinates = await getWeatherCoordinates(location);
 
-      allWeather[location] = {};
-      allWeather[location][currentCity] = {};
-      allWeather[location][currentCity].coordinates = coordinates;
+      // Reset structure for each location
+      allWeather[location] = {
+        coordinates: coordinates,
+      };
 
       const weather = await getWeather(
-        allWeather[location][currentCity].coordinates.lat,
-        allWeather[location][currentCity].coordinates.lon,
-        allWeather[location][currentCity].country
+        coordinates.lat,
+        coordinates.lon,
+        coordinates.country
       );
 
-      allWeather[location][currentCity].current = weather.current
-      allWeather[location][currentCity].weekly = weather.weekly
-      allWeather[location][currentCity].alerts = weather.alerts
-      allWeather[location][currentCity].alertDetails = weather.alertDetails
-      allWeather[location][currentCity].radar = weather.radar
-      allWeather[location][currentCity].special = weather.special
-      allWeather[location][currentCity].indices = weather.indices
+      // Directly assign properties without nested indexes
+      Object.assign(allWeather[location], {
+        current: weather.current,
+        weekly: weather.weekly,
+        alerts: weather.alerts,
+        alertDetails: weather.alertDetails,
+        radar: weather.radar,
+        special: weather.special,
+        indices: weather.indices
+      });
 
-      console.log(`Processed ${location} (${currentCity})`)
-
-      currentCity++
-
+      console.log(`Processed ${location}`);
     } catch (error) {
       console.error(`Error processing ${location}: ${error.message}`);
     }
-     
   }
 }
 
@@ -206,49 +205,49 @@ return {
 let currentLDLCity = 0
 
 async function loadAllLDLCities() {
-// hope this workies
-for (const location of serverConfig.locationIndex.ldlLocations) {
-  try {
-    const coordinates = await getLDLWeatherCoordinates(location)
+  for (const location of serverConfig.locationIndex.ldlLocations) {
+    try {
+      const coordinates = await getLDLWeatherCoordinates(location);
 
-    ldlWeather[location] = {};
-    ldlWeather[location][currentLDLCity] = {};
-    ldlWeather[location][currentLDLCity].coordinates = coordinates;
+      // Reset structure for each LDL location
+      ldlWeather[location] = {
+        coordinates: coordinates,
+      };
 
-    const weather = await getLDLWeather(
-      ldlWeather[location][currentLDLCity].coordinates.lat,
-      ldlWeather[location][currentLDLCity].coordinates.lon,
-      ldlWeather[location][currentLDLCity].country
-    );
+      const weather = await getLDLWeather(
+        coordinates.lat,
+        coordinates.lon,
+        coordinates.country
+      );
 
-    ldlWeather[location][currentLDLCity].current = weather.ldlCurrent
-    ldlWeather[location][currentLDLCity].alerts = weather.ldlAlerts
-    ldlWeather[location][currentLDLCity].forecast = weather.ldlWeekly
-    ldlWeather[location][currentLDLCity].aqi = weather.ldlAqi
-    ldlWeather[location][currentLDLCity].almanac = weather.ldlAlmanac
+      // Directly assign properties without nested indexes
+      Object.assign(ldlWeather[location], {
+        current: weather.ldlCurrent,
+        alerts: weather.ldlAlerts,
+        forecast: weather.ldlWeekly,
+        aqi: weather.ldlAqi,
+        almanac: weather.ldlAlmanac
+      });
 
-    console.log(`Processed ${location} (${currentLDLCity})`)
-
-    currentLDLCity++
-
-  } catch (error) {
-    console.error(`Error processing ${location}: ${error.message}`);
+      console.log(`Processed ${location}`);
+    } catch (error) {
+      console.error(`Error processing ${location}: ${error.message}`);
+    }
   }
-   
-}
 }
 
 async function runDataInterval() {
-  await loadAllCities()
-  await loadAllLDLCities()
-  console.log("Ran data and text generation intervals.")
-  console.log("============================================")
+  await loadAllCities();
+  await loadAllLDLCities();
+  console.log("Ran data and text generation intervals.");
+  console.log("============================================");
   console.log(`### WEATHER HTML DISPLAY SYSTEM ###`);
   console.log(`Created by SSPWXR and ScentedOrange`);
   console.log(`Server is running on http://localhost:${serverConfig.webPort}`);
+  console.log("Memory usage:", Math.round(process.memoryUsage().rss / 1024 / 1024), "MB");
 
   if (serverConfig.twcApiKey.length === 0) {
-    console.error(`NO API KEY PRESENT! PLEASE ENTER A WEATHER.COM API KEY...`)
+    console.error(`NO API KEY PRESENT! PLEASE ENTER A WEATHER.COM API KEY...`);
   }
 }
 
