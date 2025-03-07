@@ -1,3 +1,4 @@
+const { fork } = require('child_process');
 const express = require('express');
 const path = require('path');
 const app = express();
@@ -121,6 +122,17 @@ async function getWeatherCoordinates(location) {
     postalKey: locationData.postalKey[0],
     ianaTimeZone: locationData.ianaTimeZone[0]
   };
+}
+
+function scheduleRestart() {
+  setTimeout(() => {
+    console.log('Restarting server to clear RAM...');
+    const newServer = fork('server.js');
+    newServer.on('error', (err) => {
+      console.error('Restart failed:', err);
+    });
+    process.exit();
+  }, 30 * 60 * 1000); // 30 minutes
 }
 
 let currentCity = 0
@@ -264,6 +276,10 @@ app.get('/locations', (req, res) => {
     locationIndex: serverConfig.locationIndex,
     })
 })
+
+app.listen(serverConfig.webPort, () => {
+  scheduleRestart(); // Add this line
+});
 
 app.get('/data', (req, res) => {
   res.json({
